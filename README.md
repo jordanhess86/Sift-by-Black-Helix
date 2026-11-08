@@ -2,6 +2,13 @@
 
 Sift is a free, unofficial Chrome extension for organizing your own ChatGPT chats and projects. You can search, archive, move, rename and delete many chats at once, and back them up to a folder on your computer first.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dark.png">
+  <img src="docs/screenshot-light.png" alt="Sift showing a list of chats grouped by project, with three chats ticked and Archive and Delete buttons in a bar at the bottom">
+</picture>
+
+<sub>The screenshot shows made-up chats.</sub>
+
 Version 0.20.0.
 
 > **Sift isn't made by or affiliated with OpenAI.** It works by using the same requests the ChatGPT website uses, which OpenAI doesn't officially support. OpenAI's terms restrict automated access, so using Sift carries some risk to your account. Sift only acts when you start something, and it works in small, slow batches, but that doesn't remove the risk. ChatGPT can also change its site at any time and break Sift.
