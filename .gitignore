@@ -1,0 +1,28 @@
+# Private notes and anything that could hold chats or login details.
+# Never upload these.
+CLAUDE.md
+*.har
+*.har.*
+*network*log*
+*cleaned*.json
+ChatGPT Backups/
+backups/
+sift-account.json
+backup-index.json
+search-index.json
+related-index.bin
+*.csv
+sift-diagnostic*.json
+
+# Files the tests create and then delete
+tests/web/
+tests/preview2.html
+tests/preview3a.html
+tests/preview3b.html
+tests/preview4.html
+
+# Mac and editor clutter
+.DS_Store
+.vscode/
+.idea/
+node_modules/

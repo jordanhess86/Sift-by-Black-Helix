@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sift by Black Helix</title>
+    <link rel="icon" href="icons/icon-32.png" />
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
+    <header class="top-bar">
+      <div class="brand">
+        <img class="brand-logo" src="icons/icon-128.png" width="36" height="36" alt="" />
+        <div>
+          <h1>Sift</h1>
+          <p class="brand-tagline">by Black Helix</p>
+        </div>
+      </div>
+      <form id="content-search-form" class="header-search" hidden>
+        <label class="search-box">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <span class="visually-hidden">Search all chats</span>
+          <input id="content-search-input" type="search" autocomplete="off" placeholder="Search titles, chat text and topics" />
+        </label>
+        <button id="content-search-button" class="secondary-button" type="submit">Search</button>
+        <button id="content-search-clear" class="secondary-button" type="button" hidden>Clear search</button>
+      </form>
+      <div class="top-actions">
+        <span id="account-label" class="account-label" title="The ChatGPT account Sift is using" hidden></span>
+        <button id="backup-button" class="secondary-button" type="button" hidden>Back up new and changed chats…</button>
+        <button id="load-button" class="primary-button" type="button">Load my chats</button>
+        <button id="settings-button" class="icon-button" type="button" aria-label="Settings" aria-expanded="false" aria-controls="settings-panel">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"></path><circle cx="16" cy="7" r="2"></circle><circle cx="8" cy="17" r="2"></circle></svg>
+        </button>
+      </div>
+    </header>
+
+    <section id="settings-panel" class="floating-panel settings-panel" aria-label="Settings" hidden>
+      <h2>Settings</h2>
+      <fieldset class="settings-group">
+        <legend>Appearance</legend>
+        <label><input type="radio" name="theme" value="light" /> Light</label>
+        <label><input type="radio" name="theme" value="dark" /> Dark</label>
+        <label><input type="radio" name="theme" value="system" checked /> Match my computer</label>
+      </fieldset>
+      <fieldset class="settings-group">
+        <legend>How Sift opens</legend>
+        <label><input type="radio" name="open-mode" value="split" checked /> Split View with ChatGPT</label>
+        <label><input type="radio" name="open-mode" value="tabs" /> Two tabs</label>
+      </fieldset>
+      <fieldset class="settings-group">
+        <legend>Backup folder</legend>
+        <p id="setting-folder-name" class="setting-value">No folder chosen yet</p>
+        <p id="setting-account-folder" class="setting-note" hidden></p>
+        <button id="setting-folder-change" class="secondary-button" type="button">Change folder…</button>
+        <p class="setting-note">Each ChatGPT account gets its own subfolder here automatically. Changing this only affects the account you're using now, and your existing backups stay where they are. Avoid iCloud, Dropbox and similar services.</p>
+      </fieldset>
+      <fieldset class="settings-group">
+        <legend>When Sift opens</legend>
+        <label><input id="setting-auto-load" type="checkbox" checked /> Load my chats automatically</label>
+      </fieldset>
+      <fieldset class="settings-group">
+        <legend>What to load</legend>
+        <label><input type="radio" name="load-scope" value="basic" checked /> Chats not in projects</label>
+        <label><input type="radio" name="load-scope" value="everything" /> Everything</label>
+        <p class="setting-note">With the first choice, click a project to load its chats. This applies the next time your chats load.</p>
+      </fieldset>
+      <fieldset class="settings-group">
+        <legend>Help</legend>
+        <button id="guide-show" class="secondary-button" type="button">Start the setup walkthrough</button>
+        <button id="settings-report" class="secondary-button" type="button">Save diagnostic report</button>
+      </fieldset>
+    </section>
+
+    <p id="status" class="status" role="status">
+      Keep a chatgpt.com tab open and logged in, then click "Load my chats".
+    </p>
+    <ul id="warnings" class="warnings" hidden></ul>
+    <section id="health-banner" class="health-banner" aria-labelledby="health-title" role="alert" hidden>
+      <h2 id="health-title">Sift paused some actions to protect your chats</h2>
+      <p id="health-detail"></p>
+      <p id="health-advice"></p>
+      <div class="health-actions">
+        <button id="health-update" class="secondary-button" type="button" hidden>Finish updating Sift</button>
+        <button id="health-retry" class="secondary-button" type="button">Check again</button>
+        <button id="health-report" class="secondary-button" type="button">Save diagnostic report</button>
+      </div>
+    </section>
+
+    <section id="guide" class="guide" aria-labelledby="guide-title" hidden>
+      <div class="guide-heading">
+        <div>
+          <h2 id="guide-title" tabindex="-1">Welcome to Sift</h2>
+          <p class="log-note">Three quick steps to get everything ready. You can do them any time.</p>
+        </div>
+        <button id="guide-dismiss" class="secondary-button" type="button">I'm done</button>
+      </div>
+      <ol class="guide-steps">
+        <li id="guide-step-folder" class="guide-step">
+          <span class="guide-check" aria-hidden="true"></span>
+          <div class="guide-text">
+            <h3>Choose a backup folder</h3>
+            <p>Backups and search data go here. Pick a folder outside iCloud, Dropbox and similar services, so your chats stay on this computer.</p>
+          </div>
+          <button id="guide-folder" class="secondary-button" type="button">Choose folder…</button>
+        </li>
+        <li id="guide-step-backup" class="guide-step">
+          <span class="guide-check" aria-hidden="true"></span>
+          <div class="guide-text">
+            <h3>Back up your chats</h3>
+            <p>Saves up to 200 chats per run, so large accounts may need a few runs. Search can only find chats that are backed up.</p>
+          </div>
+          <button id="guide-backup" class="secondary-button" type="button">Back up…</button>
+        </li>
+        <li id="guide-step-related" class="guide-step">
+          <span class="guide-check" aria-hidden="true"></span>
+          <div class="guide-text">
+            <h3>Prepare related search</h3>
+            <p>Lets search find chats by topic as well as exact words. This runs on your computer, and nothing is sent anywhere.</p>
+          </div>
+          <button id="guide-related" class="secondary-button" type="button">Prepare…</button>
+        </li>
+      </ol>
+    </section>
+
+    <section id="content-search" class="results-view" aria-labelledby="content-search-title" hidden>
+      <h2 id="content-search-title"></h2>
+      <p id="content-search-status" class="content-search-status" role="status" hidden></p>
+      <div class="related-bar">
+        <span id="related-status" role="status">Related search also finds chats by topic, once they're prepared.</span>
+        <button id="related-prepare" class="secondary-button" type="button">Prepare related search…</button>
+        <button id="related-stop" class="secondary-button" type="button" hidden>Stop preparing</button>
+      </div>
+      <ol id="content-results" class="content-results" hidden></ol>
+    </section>
+
+    <main id="library" class="library" hidden>
+      <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+      <aside id="sidebar" class="sidebar" aria-label="Projects and chat groups">
+        <div class="sidebar-heading">
+          <h2>Projects</h2>
+          <button id="sidebar-close" class="secondary-button" type="button">Close</button>
+        </div>
+        <nav id="groups" class="groups" aria-label="Chat groups"></nav>
+        <p class="privacy-note">
+          <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+          <span>Backups and search data stay on this computer.</span>
+        </p>
+      </aside>
+      <section class="chats">
+        <div class="chats-heading">
+          <button id="sidebar-toggle" class="secondary-button sidebar-toggle" type="button" aria-expanded="false" aria-controls="sidebar">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"></path></svg>
+            Projects
+          </button>
+          <h2 id="group-title"></h2>
+          <button id="archived-backup-button" class="secondary-button" type="button" hidden>Back up archived chats with no backup…</button>
+        </div>
+        <details class="date-filter">
+          <summary>Filter by date</summary>
+          <form id="filters" class="filters">
+            <label>
+              Date to filter by
+              <select id="filter-date-field">
+                <option value="updatedAt">Last updated</option>
+                <option value="createdAt">Created</option>
+              </select>
+            </label>
+            <label>
+              From
+              <input id="filter-from" type="date" />
+            </label>
+            <label>
+              To
+              <input id="filter-to" type="date" />
+            </label>
+            <button id="filter-clear" class="secondary-button" type="button" hidden>Clear filters</button>
+          </form>
+        </details>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col" class="check-cell">
+                  <input id="select-all" type="checkbox" aria-label="Select all chats shown" />
+                </th>
+                <th scope="col" data-sort-key="title"><button class="sort-button" type="button" data-sort="title">Chat<span class="sort-arrow" aria-hidden="true"></span></button></th>
+                <th scope="col" class="wide-only" data-sort-key="project"><button class="sort-button" type="button" data-sort="project">Project<span class="sort-arrow" aria-hidden="true"></span></button></th>
+                <th scope="col" class="wide-only" data-sort-key="createdAt"><button class="sort-button" type="button" data-sort="createdAt">Created<span class="sort-arrow" aria-hidden="true"></span></button></th>
+                <th scope="col" data-sort-key="updatedAt"><button class="sort-button" type="button" data-sort="updatedAt">Updated<span class="sort-arrow" aria-hidden="true"></span></button></th>
+              </tr>
+            </thead>
+            <tbody id="chat-rows"></tbody>
+          </table>
+        </div>
+        <p id="empty-note" class="empty-note" hidden>No chats here.</p>
+      </section>
+    </main>
+
+    <details class="log-panel">
+      <summary id="log-summary">Action log</summary>
+      <p class="log-note">
+        Saved only in Chrome on this computer. Uninstalling the extension erases it, so export a copy if you want to keep it.
+      </p>
+      <button id="log-export" class="secondary-button" type="button">Export log as a spreadsheet file (CSV)</button>
+      <p id="log-empty" class="empty-note">Nothing has been logged yet.</p>
+      <div class="table-wrap">
+        <table id="log-table" hidden>
+          <thead>
+            <tr>
+              <th scope="col">Time</th>
+              <th scope="col">Action</th>
+              <th scope="col">Result</th>
+              <th scope="col">Chat</th>
+              <th scope="col">Project</th>
+            </tr>
+          </thead>
+          <tbody id="log-rows"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <section id="move-panel" class="floating-panel move-panel" aria-labelledby="move-panel-title" hidden>
+      <div class="panel-heading">
+        <h2 id="move-panel-title">Move or create a project</h2>
+        <button id="move-panel-close" class="secondary-button" type="button">Close</button>
+      </div>
+      <fieldset id="move-mode" class="move-mode">
+        <legend>Where to move selected chats</legend>
+        <label><input id="move-mode-existing" type="radio" name="move-mode" checked /> Existing project</label>
+        <label><input id="move-mode-new" type="radio" name="move-mode" /> Create New Project</label>
+      </fieldset>
+      <select id="move-target" class="move-target" aria-label="Project to move selected chats into">
+        <option value="">Choose a project…</option>
+      </select>
+      <input id="new-project-name" class="move-target" type="text" maxlength="100" placeholder="New project name" aria-label="New project name" autocomplete="off" hidden />
+      <div class="panel-actions">
+        <button id="create-project-button" class="secondary-button" type="button" hidden disabled>Create project…</button>
+        <button id="move-button" class="primary-button" type="button" disabled>Move selected…</button>
+      </div>
+    </section>
+
+    <div id="selection-bar" class="selection-bar" hidden>
+      <span id="selection-count" class="selection-count" role="status">0 chats selected</span>
+      <button id="selection-clear" class="bar-button" type="button" hidden>Clear</button>
+      <button id="move-toggle" class="bar-button" type="button" aria-expanded="false" aria-controls="move-panel">Move…</button>
+      <button id="rename-button" class="bar-button" type="button" disabled>Rename…</button>
+      <button id="archive-button" class="primary-button" type="button" disabled>Archive…</button>
+      <button id="restore-button" class="primary-button" type="button" hidden disabled>Restore…</button>
+      <button id="delete-button" class="delete-button" type="button" disabled>Delete…</button>
+    </div>
+
+    <dialog id="archive-dialog" class="archive-dialog" aria-labelledby="dialog-title">
+      <h2 id="dialog-title"></h2>
+      <p id="dialog-intro"></p>
+      <ol id="dialog-list" class="dialog-list"></ol>
+      <fieldset id="delete-backup-choice" class="delete-choice" hidden>
+        <legend id="delete-backup-question"></legend>
+        <label><input id="delete-choice-backup" type="radio" name="delete-backup-choice" value="backup" /> Back them up first, then delete</label>
+        <label><input id="delete-choice-skip" type="radio" name="delete-backup-choice" value="skip" /> Delete them without a new backup</label>
+      </fieldset>
+      <label id="dialog-typed" class="dialog-typed" hidden>
+        Type DELETE to confirm
+        <input id="dialog-typed-input" type="text" autocomplete="off" spellcheck="false" />
+      </label>
+      <div id="dialog-text" class="dialog-text" hidden></div>
+      <label id="dialog-rename" class="dialog-typed" hidden>
+        New name
+        <input id="dialog-rename-input" type="text" maxlength="200" autocomplete="off" />
+      </label>
+      <p id="dialog-message" class="dialog-message" role="status" hidden></p>
+      <div class="dialog-actions">
+        <button id="dialog-change-folder" class="secondary-button" type="button" hidden>Change folder…</button>
+        <button id="dialog-secondary" class="secondary-button" type="button" hidden></button>
+        <button id="dialog-cancel" class="secondary-button" type="button">Cancel</button>
+        <button id="dialog-confirm" class="primary-button" type="button"></button>
+        <button id="dialog-stop" class="secondary-button" type="button" hidden>Stop after this chat</button>
+        <button id="dialog-close" class="primary-button" type="button" hidden>Close</button>
+      </div>
+    </dialog>
+
+    <script src="api.js"></script>
+    <script src="filters.js"></script>
+    <script src="storage.js"></script>
+    <script src="health.js"></script>
+    <script src="backup.js"></script>
+    <script src="accounts.js"></script>
+    <script src="search.js"></script>
+    <script src="meaning-logic.js"></script>
+    <script src="related.js"></script>
+    <script src="dashboard.js"></script>
+  </body>
+</html>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Preview with fake data</title>
+    <link rel="stylesheet" href="../dashboard.css" />
+    <script>
+      // Fake Chrome extension API with made-up chats, for looking at the page only.
+      const makeChat = (id, title, gizmo = null, archived = false) => ({
+        id: String(id), title, gizmo_id: gizmo, is_archived: archived,
+        create_time: "2026-03-14T10:00:00Z", update_time: "2026-10-2" + (id % 9) + "T10:00:00Z",
+      });
+      window.chrome = { tabs: {
+        query: async () => [{ id: 1 }],
+        sendMessage: async (id, message) => {
+          if (message.type === "organizer-ping") return { ok: true };
+          if (message.type === "organizer-account") return { ok: true, status: 200, data: { id: "user-test", workspaceId: "", name: "Test User", email: "test@example.com" } };
+          const url = new URL(message.path, "https://chatgpt.com");
+          if (url.pathname.endsWith("/sidebar")) return { ok: true, data: { cursor: null, items: [
+            { gizmo: { gizmo: { id: "g-p-1", display: { name: "Kitchen renovation" } } },
+              conversations: { cursor: null, items: [makeChat(1, "Comparing countertop materials", "g-p-1"), makeChat(2, "Budget for new cabinets", "g-p-1")] } },
+            { gizmo: { gizmo: { id: "g-p-2", display: { name: "Trip planning" } } },
+              conversations: { cursor: null, items: [makeChat(3, "A very long chat title that keeps going to check that wrapping inside the table works without pushing anything off the page at all", "g-p-2")] } },
+          ] } };
+          if (url.searchParams.get("offset") !== "0") return { ok: true, data: { items: [] } };
+          if (url.searchParams.get("is_archived") === "true") return { ok: true, data: { items: [makeChat(9, "Old recipe ideas", null, true)] } };
+          return { ok: true, data: { items: [makeChat(4, "Help with a cover letter"), makeChat(5, "Chat with a custom GPT", "g-abc123"), makeChat(6, "Explain compound interest")] } };
+        },
+      } };
+    </script>
+  </head>
+  <body>
+    <header class="top-bar">
+      <div>
+        <h1>ChatGPT Organizer</h1>
+        <p class="subtitle">Read-only: this version can't change anything in your account.</p>
+      </div>
+      <button id="load-button" type="button">Load my chats</button>
+    </header>
+    <p id="status" class="status" role="status"></p>
+    <ul id="warnings" class="warnings" hidden></ul>
+    <main id="library" class="library" hidden>
+      <nav id="groups" class="groups" aria-label="Chat groups"></nav>
+      <section class="chats">
+        <h2 id="group-title"></h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Chat</th>
+                <th scope="col">Project</th>
+                <th scope="col">Created</th>
+                <th scope="col">Last updated</th>
+              </tr>
+            </thead>
+            <tbody id="chat-rows"></tbody>
+          </table>
+        </div>
+        <p id="empty-note" class="empty-note" hidden>No chats here.</p>
+      </section>
+    </main>
+    <script src="../api.js"></script>
+    <script src="../dashboard.js"></script>
+    <script>document.getElementById("load-button").click();</script>
+  </body>
+</html>
